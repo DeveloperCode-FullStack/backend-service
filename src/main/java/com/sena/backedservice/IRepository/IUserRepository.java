@@ -1,11 +1,14 @@
 package com.sena.backedservice.IRepository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import com.sena.backedservice.Dto.ILoginDto;
 import com.sena.backedservice.Dto.IPermissionDto;
+import com.sena.backedservice.Dto.IUserDto;
 import com.sena.backedservice.Entity.User;
 
 import java.util.List;
@@ -46,4 +49,7 @@ public interface IUserRepository extends JpaRepository<User, Long>{
 					+ "WHERE  "
 					+ "	u.user = :user AND u.password = :password  AND u.state = TRUE ", nativeQuery = true)
 	Optional<ILoginDto> getLogin(String user, String password);
+	
+	@Query(value = "SELECT * FROM person", nativeQuery = true)
+    Page<IUserDto> getDatatable(Pageable pageable, String search);
 }

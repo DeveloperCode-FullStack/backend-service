@@ -37,13 +37,13 @@ public class Person extends BaseModel{
 	@Column (name = "gender")
 	private Boolean gender;
 	
-	@Column (name = "mail", nullable = false, length = 30)
+	@Column (name = "mail", nullable = false, length = 30, unique = true)
 	private String mail;
 	
 	@Column(name = "phone_number", nullable = false, length = 10)
 	private String phoneNumber;
 	
-	@Column (name = "address", nullable = false, length = 30, unique = true)
+	@Column (name = "address", nullable = false, length = 30)
 	private String address;	
 	
 	public String getFirstName() {

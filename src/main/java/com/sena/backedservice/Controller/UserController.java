@@ -1,11 +1,18 @@
 package com.sena.backedservice.Controller;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.domain.Sort.Order;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,65 +21,130 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.sena.backedservice.Dto.ApiResponseDto;
 import com.sena.backedservice.Dto.ILoginDto;
 import com.sena.backedservice.Dto.IPermissionDto;
 import com.sena.backedservice.Entity.User;
 import com.sena.backedservice.Service.UserService;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 
 @CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("api/security/user")
 public class UserController {
 
-	@Autowired
-	private UserService service;
-	
-	@GetMapping
-	public List<User> all() {
-		return service.all();
-	}
-	
-	@GetMapping("{id}")
-	public Optional<User> show(@PathVariable Long id) {
-		return service.findById(id);
-	}
-	
-	@PostMapping
-	@ResponseStatus(code = HttpStatus.CREATED)
-	public User save(@RequestBody User user) {
-		return service.save(user);
-	}
-	
-	@PutMapping("{id}")
-	@ResponseStatus(code = HttpStatus.CREATED)
-	public User update(@PathVariable Long id, @RequestBody User user) {
-		Optional<User> op = service.findById(id);
-		
-		if (!op.isEmpty()) {
-			User usersUpdate = op.get();
-			BeanUtils.copyProperties(user, usersUpdate, "id");
-            return service.save(usersUpdate);
-		}
-		
-		return user;
-	}
-	
-	@GetMapping("/permission/{user}/{password}")
-	public List<IPermissionDto> getPermission(@PathVariable String user, String password) {
-		return service.getPermission(user, password);
-	}
-	
-	@GetMapping("/login/{user}/{password}")
-	public Optional<ILoginDto> getLogin(@PathVariable String user, String password) {
-		return service.getLogin(user, password);
-	}
-	
-	@DeleteMapping("{id}")
-	@ResponseStatus(code = HttpStatus.NO_CONTENT)
-	public void delete(@PathVariable Long id) {
-		service.delete(id);
-	}
+    @Autowired
+    private UserService service;
+
+    @Operation(summary = "Obtener todos los usuarios", responses = {
+            @ApiResponse(responseCode = "200", description = "Lista de usuarios obtenida"),
+            @ApiResponse(responseCode = "404", description = "No se encontraron usuarios")
+    })
+    @GetMapping
+    public List<User> all() throws Exception{
+        return service.all();
+    }
+
+    @Operation(summary = "Obtener un usuario por ID", responses = {
+            @ApiResponse(responseCode = "200", description = "Usuario encontrado"),
+            @ApiResponse(responseCode = "404", description = "Usuario no encontrado")
+    })
+    @GetMapping("{id}")
+    public Optional<User> show(@PathVariable Long id) throws Exception{
+        return service.findById(id);
+    }
+
+    @Operation(summary = "Crear un nuevo usuario", responses = {
+            @ApiResponse(responseCode = "201", description = "Usuario creado")
+    })
+    @PostMapping
+    @ResponseStatus(code = HttpStatus.CREATED)
+    public User save(@RequestBody User user) throws Exception{
+        return service.save(user);
+    }
+
+    @Operation(summary = "Actualizar un usuario existente", responses = {
+            @ApiResponse(responseCode = "200", description = "Usuario actualizado"),
+            @ApiResponse(responseCode = "404", description = "Usuario no encontrado")
+    })
+    @PutMapping("{id}")
+    @ResponseStatus(code = HttpStatus.CREATED)
+    public User update(@PathVariable Long id, @RequestBody User user) throws Exception{
+        Optional<User> op = service.findById(id);
+
+        if (op.isPresent()) {
+            User userToUpdate = op.get();
+            BeanUtils.copyProperties(user, userToUpdate, "id");
+            return service.save(userToUpdate);
+        }
+
+        return user;
+    }
+
+    @Operation(summary = "Obtener los permisos de un usuario", responses = {
+            @ApiResponse(responseCode = "200", description = "Permisos obtenidos"),
+            @ApiResponse(responseCode = "404", description = "Usuario no encontrado")
+    })
+    @GetMapping("/permission/{user}/{password}")
+    public List<IPermissionDto> getPermission(
+            @Parameter(description = "Nombre de usuario") @PathVariable String user,
+            @Parameter(description = "Contraseña") @PathVariable String password) throws Exception{
+        return service.getPermission(user, password);
+    }
+
+    @Operation(summary = "Obtener la información de inicio de sesión de un usuario", responses = {
+            @ApiResponse(responseCode = "200", description = "Información de inicio de sesión obtenida"),
+            @ApiResponse(responseCode = "404", description = "Usuario no encontrado")
+    })
+    @GetMapping("/login/{user}/{password}")
+    public Optional<ILoginDto> getLogin(
+            @Parameter(description = "Nombre de usuario") @PathVariable String user,
+            @Parameter(description = "Contraseña") @PathVariable String password) throws Exception{
+        return service.getLogin(user, password);
+    }
+
+    @Operation(summary = "Eliminar un usuario existente", responses = {
+        @ApiResponse(responseCode = "204", description = "Usuario eliminado"),
+        @ApiResponse(responseCode = "404", description = "Usuario no encontrado")
+    })
+    @DeleteMapping("{id}")
+    @ResponseStatus(code = HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable Long id) throws Exception{
+        service.delete(id);
+    }
+    
+    /**
+     * Obtiene los datos para una tabla utilizando paginación y búsqueda.
+     *
+     * @param page            el número de página
+     * @param size            el tamaño de página
+     * @param columnOrder     el nombre de la columna para ordenar
+     * @param columnDirection la dirección de ordenamiento de la columna (ascendente o descendente)
+     * @param search          el término de búsqueda para filtrar los datos de la tabla (opcional)
+     * @return ResponseEntity que contiene un objeto ApiResponseDto con los datos de la página y el estado de la respuesta
+     */
+    @GetMapping("/datatable")
+    public ResponseEntity<ApiResponseDto<Page<?>>> datatable(@RequestParam(name = "page") Integer page,
+            @RequestParam(name = "size") Integer size,
+            @RequestParam(name = "column_order") String columnOrder,
+            @RequestParam(name = "column_direction") String columnDirection,
+            @RequestParam(name = "search", required = false) String search) {
+        try {
+            List<Order> orders = new ArrayList<>();
+
+            orders.add(new Order(columnDirection == "asc" ? Direction.ASC : Direction.DESC, columnOrder));
+
+            return ResponseEntity.ok(new ApiResponseDto<Page<?>>("Datos obtenidos",
+                    service.getDatatable(PageRequest.of(page, size, Sort.by(orders)), search), true));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(new ApiResponseDto<Page<?>>(e.getMessage(), null, false));
+        }
+    }
 }
