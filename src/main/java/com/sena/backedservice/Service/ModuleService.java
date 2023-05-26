@@ -64,7 +64,12 @@ public class ModuleService implements IModuleService {
      */
     @Override
     public Module save(Module module) throws Exception {
-        return repository.save(module);
+    	Optional<IModuleDto> op = repository.getValidate(module.getCode(),module.getRoute());
+    	if (op.get().getQuantity()>=1) {
+            throw new Exception("Validar datos, ya existe registro con este código o ruta.");
+        }
+    	
+    	return repository.save(module);
     }
 
     /**
