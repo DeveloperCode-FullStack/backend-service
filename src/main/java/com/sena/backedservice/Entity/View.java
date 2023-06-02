@@ -21,11 +21,15 @@ public class View extends BaseModel{
 	@Schema(description = "Código de la vista")
 	private String code;
 	
+	@Column (name = "icon", nullable = false)
+	@Schema(description = "Ícono de la vista")
+	private String icon;
+	
 	@Column(name = "route", nullable = false, length = 150, unique = true)
 	@Schema(description = "Ruta de la vista")
 	private String route;
 	
-	@Column (name = "label", nullable = false, length = 100, unique = true)
+	@Column (name = "label", nullable = false, length = 100)
 	@Schema(description = "Etiqueta de la vista")
 	private String label;
 
@@ -51,6 +55,24 @@ public class View extends BaseModel{
 	 */
 	public void setCode(String code) {
 		this.code = code;
+	}
+	
+	/**
+	 * Retorna el ícono de la vista.
+	 *
+	 * @return el ícono de la vista
+	 */
+	public String getIcon() {
+		return icon;
+	}
+	
+	/**
+	 * Establece el ícono de la vista.
+	 *
+	 * @param code el ícono de la vista a establecer
+	 */
+	public void setIcon(String icon) {
+		this.icon = icon;
 	}
 
 	/**

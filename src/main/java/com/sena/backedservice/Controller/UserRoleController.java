@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -73,16 +72,13 @@ public class UserRoleController {
     })
     @PutMapping("{id}")
     @ResponseStatus(code = HttpStatus.CREATED)
-    public UserRole update(@PathVariable Long id, @RequestBody UserRole userRole) throws Exception{
-        Optional<UserRole> op = service.findById(id);
-
-        if (op.isPresent()) {
-            UserRole userRoleToUpdate = op.get();
-            BeanUtils.copyProperties(userRole, userRoleToUpdate, "id");
-            return service.save(userRoleToUpdate);
+    public ResponseEntity<ApiResponseDto<UserRole>> update(@PathVariable Long id, @RequestBody UserRole userRole) {
+        try {
+            service.update(id, userRole);
+            return ResponseEntity.ok(new ApiResponseDto<UserRole>("Datos actualizados", null, true));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(new ApiResponseDto<UserRole>(e.getMessage(), null, false));
         }
-
-        return userRole;
     }
 
     @Operation(summary = "Eliminar un rol de usuario existente", responses = {

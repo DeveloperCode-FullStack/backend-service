@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -76,16 +75,13 @@ public class UserController {
     })
     @PutMapping("{id}")
     @ResponseStatus(code = HttpStatus.CREATED)
-    public User update(@PathVariable Long id, @RequestBody User user) throws Exception{
-        Optional<User> op = service.findById(id);
-
-        if (op.isPresent()) {
-            User userToUpdate = op.get();
-            BeanUtils.copyProperties(user, userToUpdate, "id");
-            return service.save(userToUpdate);
+    public ResponseEntity<ApiResponseDto<User>> update(@PathVariable Long id, @RequestBody User user) {
+        try {
+            service.update(id, user);
+            return ResponseEntity.ok(new ApiResponseDto<User>("Datos actualizados", null, true));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(new ApiResponseDto<User>(e.getMessage(), null, false));
         }
-
-        return user;
     }
 
     @Operation(summary = "Obtener los permisos de un usuario", responses = {

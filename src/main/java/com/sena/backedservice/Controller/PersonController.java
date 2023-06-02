@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -73,16 +72,13 @@ public class PersonController {
     })
     @PutMapping("{id}")
     @ResponseStatus(code = HttpStatus.CREATED)
-    public Person update(@PathVariable Long id, @RequestBody Person person) throws Exception{
-        Optional<Person> op = service.findById(id);
-
-        if (op.isPresent()) {
-            Person personToUpdate = op.get();
-            BeanUtils.copyProperties(person, personToUpdate, "id");
-            return service.save(personToUpdate);
+    public ResponseEntity<ApiResponseDto<Person>> update(@PathVariable Long id, @RequestBody Person person) {
+        try {
+            service.update(id, person);
+            return ResponseEntity.ok(new ApiResponseDto<Person>("Datos actualizados", null, true));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(new ApiResponseDto<Person>(e.getMessage(), null, false));
         }
-
-        return person;
     }
 
     @Operation(summary = "Eliminar una persona existente", responses = {

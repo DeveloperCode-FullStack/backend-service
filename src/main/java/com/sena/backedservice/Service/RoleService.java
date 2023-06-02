@@ -61,7 +61,11 @@ public class RoleService implements IRoleService {
      */
     @Override
     public Role save(Role role) throws Exception{
-        return repository.save(role);
+    	Optional<IRoleDto> op = repository.getValidate(role.getCode(),role.getDescription());
+    	if (op.get().getQuantity()>=1) {
+            throw new Exception("Validar datos, ya existe registro con este código o descripción.");
+        }
+    	return repository.save(role);
     }
 
     /**

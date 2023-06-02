@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -73,16 +72,13 @@ public class RoleController {
     })
     @PutMapping("{id}")
     @ResponseStatus(code = HttpStatus.CREATED)
-    public Role update(@PathVariable Long id, @RequestBody Role role) throws Exception{
-        Optional<Role> op = service.findById(id);
-
-        if (op.isPresent()) {
-            Role roleToUpdate = op.get();
-            BeanUtils.copyProperties(role, roleToUpdate, "id");
-            return service.save(roleToUpdate);
+    public ResponseEntity<ApiResponseDto<Role>> update(@PathVariable Long id, @RequestBody Role role) {
+        try {
+            service.update(id, role);
+            return ResponseEntity.ok(new ApiResponseDto<Role>("Datos actualizados", null, true));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(new ApiResponseDto<Role>(e.getMessage(), null, false));
         }
-
-        return role;
     }
 
     @Operation(summary = "Eliminar un rol existente", responses = {

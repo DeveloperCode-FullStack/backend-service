@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -73,16 +72,13 @@ public class ViewController {
     })
     @PutMapping("{id}")
     @ResponseStatus(code = HttpStatus.CREATED)
-    public View update(@PathVariable Long id, @RequestBody View view) throws Exception{
-        Optional<View> op = service.findById(id);
-
-        if (op.isPresent()) {
-            View viewToUpdate = op.get();
-            BeanUtils.copyProperties(view, viewToUpdate, "id");
-            return service.save(viewToUpdate);
+    public ResponseEntity<ApiResponseDto<View>> update(@PathVariable Long id, @RequestBody View view) {
+        try {
+            service.update(id, view);
+            return ResponseEntity.ok(new ApiResponseDto<View>("Datos actualizados", null, true));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(new ApiResponseDto<View>(e.getMessage(), null, false));
         }
-
-        return view;
     }
 
     @Operation(summary = "Eliminar una vista existente", responses = {

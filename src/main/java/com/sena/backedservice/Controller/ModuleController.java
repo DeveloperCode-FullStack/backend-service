@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -70,19 +69,15 @@ public class ModuleController {
     @Operation(summary = "Actualizar un módulo existente", responses = {
             @ApiResponse(responseCode = "200", description = "Módulo actualizado"),
             @ApiResponse(responseCode = "404", description = "Módulo no encontrado")
-    })
+    })   
     @PutMapping("{id}")
-    @ResponseStatus(code = HttpStatus.CREATED)
-    public Module update(@PathVariable Long id, @RequestBody Module module) throws Exception{
-        Optional<Module> op = service.findById(id);
-
-        if (op.isPresent()) {
-            Module moduleToUpdate = op.get();
-            BeanUtils.copyProperties(module, moduleToUpdate, "id");
-            return service.save(moduleToUpdate);
+    public ResponseEntity<ApiResponseDto<Module>> update(@PathVariable Long id, @RequestBody Module module) {
+        try {
+            service.update(id, module);
+            return ResponseEntity.ok(new ApiResponseDto<Module>("Datos actualizados", null, true));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(new ApiResponseDto<Module>(e.getMessage(), null, false));
         }
-
-        return module;
     }
 
     @Operation(summary = "Eliminar un módulo existente", responses = {

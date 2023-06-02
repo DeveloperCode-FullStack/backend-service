@@ -1,5 +1,16 @@
 package com.sena.backedservice.Dto;
 
-public interface IViewDto {
+public interface IViewDto {	
 	
+    String getCode();
+    
+    String getIcon();
+
+    String getRoute();
+   
+    String getLabel();
+    
+    Integer getModule();
+    
+    Integer getQuantity();
 }

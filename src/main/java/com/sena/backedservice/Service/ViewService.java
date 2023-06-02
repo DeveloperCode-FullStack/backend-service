@@ -61,6 +61,10 @@ public class ViewService implements IViewService {
      */
     @Override
     public View save(View view) throws Exception{
+    	Optional<IViewDto> op = repository.getValidate(view.getCode(),view.getRoute());
+    	if (op.get().getQuantity()>=1) {
+            throw new Exception("Validar datos, ya existe registro con este código o ruta.");
+        }
         return repository.save(view);
     }
 
