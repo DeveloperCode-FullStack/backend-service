@@ -16,9 +16,10 @@ public interface IModuleRepository extends JpaRepository<Module, Long>  {
 	@Query(value = "SELECT "
 					+ " code, "
 					+ " route, "
-					+ " label, "
-					+ " FROM "
-					+ " module", nativeQuery = true)
+					+ " label "
+					+ "FROM "
+					+ "	module "
+					+ "WHERE state = true", nativeQuery = true)
     Page<IModuleDto> getDatatable(Pageable pageable, String search);
 	
 	@Query(value = "SELECT "

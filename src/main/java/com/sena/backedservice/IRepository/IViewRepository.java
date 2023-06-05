@@ -21,7 +21,10 @@ public interface IViewRepository extends JpaRepository<View, Long>{
 				+ " 	m.route as module "
 				+ " FROM "
 				+ " 	view v"
-				+ " INNER JOIN module m ON m.id = v.module_id", nativeQuery = true)
+				+ " INNER JOIN module m ON m.id = v.module_id"
+				+ " WHERE "
+				+ "     v.state = true "
+				+ " AND	m.state = true ", nativeQuery = true)
 	Page<IViewDto> getDatatable(Pageable pageable, String search);
 	
 	@Query(value = "SELECT "

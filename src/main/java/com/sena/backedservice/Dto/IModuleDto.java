@@ -28,5 +28,12 @@ public interface IModuleDto {
      *
      * @return la cantidad del modulo
      */
+    Integer getState();
+    
+    /**
+     * Obtiene la cantidad del modulo.
+     *
+     * @return la cantidad del modulo
+     */
     Integer getQuantity();
 }
